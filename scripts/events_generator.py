@@ -11,7 +11,7 @@ EVENTS_PER_FILE = 100
 FILE_INTERVAL = 10
 
 # Sample data
-USER_IDS = [uuid4() for i in range(50)]
+USER_IDS = list(range(1, 51))
 PRODUCTS = [
     {"product_id": "PROD001", "product_name": "Laptop", "price": 999.99},
     {"product_id": "PROD002", "product_name": "Mouse", "price": 29.99},
@@ -25,7 +25,7 @@ PRODUCTS = [
     {"product_id": "PROD010", "product_name": "Smartwatch", "price": 249.99},
 ]
 
-EVENT_TYPES = ["product_view", "add_to_cart", "purchase", "remove_from_cart"]
+EVENT_TYPES = ["view", "add_to_cart", "purchase", "remove_from_cart"]
 
 
 def generate_event():
@@ -36,9 +36,6 @@ def generate_event():
         EVENT_TYPES, weights=[0.6, 0.2, 0.1, 0.1] 
     )[0]
 
-    # For purchases, use actual price. For other events, 0
-    amount = product["price"] if event_type == "purchase" else 0.0
-
     event = {
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "user_id": user_id,
@@ -46,7 +43,6 @@ def generate_event():
         "product_id": product["product_id"],
         "product_name": product["product_name"],
         "product_price": product["price"],
-        "amount": amount,
         "session_id": f"SESSION{user_id}{random.randint(1000, 9999)}",
     }
 
