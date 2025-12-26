@@ -1,43 +1,75 @@
 services:
+  # PostgreSQL Database
   db:
     image: postgres:18.1-alpine
     container_name: streaming_db
+    hostname: streaming_db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgrespass
-      POSTGRES_DB: postgresdb
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-postgresdb}
     ports:
-      - 5432:5432
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./db/postgres_setup.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - streaming_network
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "postgresdb"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-postgresdb}"]
       interval: 10s
-      timeout: 10s
+      timeout: 5s
       retries: 5
+      start_period: 20s
     restart: unless-stopped
+    
 
-  streaming_app:
-    build: .
+  # Spark Streaming Application
+  spark_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: streaming_app
     environment:
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgrespass
-      POSTGRES_DB: postgresdb
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-postgresdb}
     depends_on:
       db:
         condition: service_healthy
     ports:
-      - 8080:8080
+      - "8080:8080"
     volumes:
-      - ./data:/app/data
+      - .:/streaming/app
+      - ./input_data:/streaming/app/input_data 
     networks:
       - streaming_network
-    
+    command: ["python3", "streaming_pipeline.py"]
+    restart: unless-stopped
+
+  
+  events_app:
+    image: python:3.14-slim
+    container_name: events_app
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-postgresdb}
+    depends_on: 
+      - spark_app
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./scripts:/app/scripts
+      - ./input_data:/app/input_data 
+    networks:
+      - streaming_network
+    command: ["python3", "/app/scripts/events_generator.py"]
+    restart: unless-stopped
+ 
 
 
 volumes:
@@ -45,4 +77,4 @@ volumes:
 
 networks:
   streaming_network:
-    
+    driver: bridge
