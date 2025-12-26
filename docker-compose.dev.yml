@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:18.1-alpine
+    container_name: streaming_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespass
+      POSTGRES_DB: postgresdb
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - streaming_network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "postgresdb"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  streaming_app:
+    build: .
+    container_name: streaming_app
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespass
+      POSTGRES_DB: postgresdb
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - 8080:8080
+    volumes:
+      - ./data:/app/data
+    networks:
+      - streaming_network
+    
+
+
+volumes:
+  postgres_data:
+
+networks:
+  streaming_network:
+    
