@@ -1,9 +1,11 @@
 import csv
+import os
 import random
+import time
 from datetime import datetime
 
 # Configuration
-OUTPUT_DIR = "input_data"
+OUTPUT_DIR = "app/input_data"
 EVENTS_PER_FILE = 100
 FILE_INTERVAL = 10
 
@@ -34,9 +36,9 @@ def generate_event():
     )[0]
 
     event = {
-        "event_timestamp": datetime.now(),
         "user_id": user_id,
         "event_type": event_type,
+        "event_timestamp": datetime.now(),
         "product_id": product["product_id"],
         "product_name": product["product_name"],
         "product_price": product["price"],
@@ -60,3 +62,19 @@ def generate_csv_file():
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(events)
+
+
+def main():
+    """Main loop - generate files continuously"""
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+    try:
+        while True:
+            generate_csv_file()
+            time.sleep(FILE_INTERVAL)
+    except KeyboardInterrupt:
+        print("\n\n[STOPPED] Event generation stopped by user")
+
+
+if __name__ == "__main__":
+    main()
