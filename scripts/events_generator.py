@@ -1,9 +1,6 @@
 import csv
-import os
 import random
-import time
 from datetime import datetime
-from uuid import uuid4
 
 # Configuration
 OUTPUT_DIR = "input_data"
@@ -37,13 +34,13 @@ def generate_event():
     )[0]
 
     event = {
-        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "event_timestamp": datetime.now(),
         "user_id": user_id,
         "event_type": event_type,
         "product_id": product["product_id"],
         "product_name": product["product_name"],
         "product_price": product["price"],
-        "session_id": f"SESSION{user_id}{random.randint(1000, 9999)}",
+        "session_id": f"SESSION{user_id % 10}",
     }
 
     return event

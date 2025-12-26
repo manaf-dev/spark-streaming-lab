@@ -11,7 +11,7 @@ CREATE TABLE user_events (
     product_price DECIMAL(10, 2) NOT NULL,
     event_timestamp TIMESTAMP NOT NULL,
     session_id VARCHAR(100) NOT NULL,
-    ingestion_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT check_event_type CHECK (event_type IN ('view', 'purchase', 'add_to_cart', 'remove_from_cart')),
     CONSTRAINT check_price CHECK (product_price >= 0)
 );
