@@ -15,12 +15,13 @@ postgres_properties = {
 url = f"jdbc:postgresql://{postgres_properties['host']}:{postgres_properties['port']}/{postgres_properties['database']}"
 
 
-def load_to_postgres(transformed_df):
-    transformed_df.write.jdbc(
+def load_to_postgres(batch_df, batch_id):
+    if batch_df.isEmpty():
+        return
+
+    batch_df.write.jdbc(
         url=url,
         table="user_events",
         mode="append",
         properties=jdbc_properties,
     )
-
-    return True
