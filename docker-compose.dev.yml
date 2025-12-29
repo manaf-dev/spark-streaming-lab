@@ -46,7 +46,7 @@ services:
       - ./input_data:/streaming/app/input_data 
     networks:
       - streaming_network
-    command: ["python3", "streaming_pipeline.py"]
+    command: ["python3", "spark_streaming_to_postgres.py"]
     restart: unless-stopped
 
   
@@ -67,7 +67,7 @@ services:
       - ./input_data:/app/input_data 
     networks:
       - streaming_network
-    command: ["python3", "/app/scripts/events_generator.py"]
+    command: ["python3", "/app/scripts/data_generator.py"]
     restart: unless-stopped
  
 
