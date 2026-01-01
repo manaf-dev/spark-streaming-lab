@@ -3,14 +3,17 @@ import os
 import random
 import time
 from datetime import datetime
+from uuid import uuid4
 
 # Configuration
 OUTPUT_DIR = "app/input_data"
-EVENTS_PER_FILE = 100
+EVENTS_PER_FILE = 1000
 FILE_INTERVAL = 10
+NUM_USERS = 100
 
 # Sample data
-USER_IDS = list(range(1, 51))
+USER_IDS = [f"USER_{i:06d}" for i in range(1, NUM_USERS + 1)]
+
 PRODUCTS = [
     {"product_id": "PROD001", "product_name": "Laptop", "price": 999.99},
     {"product_id": "PROD002", "product_name": "Mouse", "price": 29.99},
@@ -26,14 +29,19 @@ PRODUCTS = [
 
 EVENT_TYPES = ["view", "add_to_cart", "purchase", "remove_from_cart"]
 
+SESSIONS = {}
 
 def generate_event():
     """Generate a single user event"""
     user_id = random.choice(USER_IDS)
     product = random.choice(PRODUCTS)
-    event_type = random.choices(
-        EVENT_TYPES, weights=[0.6, 0.2, 0.1, 0.1] 
-    )[0]
+    event_type = random.choices(EVENT_TYPES, weights=[0.6, 0.4, 0.2, 0.1])[0]
+
+    if user_id not in SESSIONS:
+        session_id = str(uuid4())
+        SESSIONS[user_id] = session_id
+    else:
+        session_id = SESSIONS[user_id]
 
     event = {
         "user_id": user_id,
@@ -42,7 +50,7 @@ def generate_event():
         "product_id": product["product_id"],
         "product_name": product["product_name"],
         "product_price": product["price"],
-        "session_id": f"SESSION{user_id % 10}",
+        "session_id": session_id,
     }
 
     return event

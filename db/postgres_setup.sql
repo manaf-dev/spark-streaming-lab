@@ -4,7 +4,7 @@ DROP TABLE IF EXISTS user_events;
 -- user_events table
 CREATE TABLE user_events (
     event_id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL,
+    user_id VARCHAR(50) NOT NULL,
     event_type VARCHAR(20) NOT NULL,
     product_id VARCHAR(50) NOT NULL,
     product_name VARCHAR(255) NOT NULL,
