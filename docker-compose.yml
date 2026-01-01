@@ -2,8 +2,7 @@ services:
   # PostgreSQL Database
   db:
     image: postgres:18.1-alpine
-    container_name: streaming_db
-    hostname: streaming_db
+    container_name: spark_db
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
@@ -40,7 +39,7 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "8080:8080"
+      - "4040:4040"
     volumes:
       - .:/streaming/app
       - ./input_data:/streaming/app/input_data 
@@ -60,8 +59,6 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-postgresdb}
     depends_on: 
       - spark_app
-    ports:
-      - "8081:8080"
     volumes:
       - ./scripts:/app/scripts
       - ./input_data:/app/input_data 
