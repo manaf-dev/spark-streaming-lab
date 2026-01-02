@@ -56,7 +56,7 @@ docker compose ps
 
 # You should see the following services:
 - db
-- spark_app
+- streaming_app
 - events_app
 ```
 
@@ -93,6 +93,12 @@ SELECT COUNT(*) FROM user_events;
 
 # Count events by type
 SELECT event_type, COUNT(*) FROM user_events GROUP BY event_type;
+
+# Query purchase analytics view
+SELECT * FROM purchase_analytics LIMIT 5;
+
+# User activity summary
+SELECT * FROM user_activity_summary LIMIT 10;
 
 # Exit
 exit
