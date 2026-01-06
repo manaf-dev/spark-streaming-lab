@@ -27,8 +27,6 @@ head -2 input_data/events_*.csv | tail -n +2 | head -1  # Verify header
 # Check if Spark is running
 docker ps | grep streaming_app
 
-# Monitor logs for processing
-docker logs -f streaming_app 2>&1 | grep -i "batch\|processing"
 
 # Check checkpoint directory exists
 docker compose exec streaming_app ls -la /streaming/spark/checkpoints/ | head -5
@@ -114,5 +112,3 @@ docker compose exec db psql -U spark_user -d spark_db -c \
 ```bash
 docker compose down -v
 ```
-
----
