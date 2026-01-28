@@ -1,8 +1,11 @@
 from pyspark.sql import SparkSession
 
+from config import get_logger
 from etl.extractor import read_events
 from etl.load import load_to_postgres
 from etl.transform import transform_data
+
+logger = get_logger(__name__)
 
 
 def initiate_spark():
@@ -20,9 +23,9 @@ def initiate_spark():
 
 
 def main():
-    print("Starting ETL process...")
     spark = initiate_spark()
     try:
+        logger.info("Starting ETL process...")
         stream_df = read_events(spark)
         transformed_df = transform_data(stream_df)
         streaming_query = (
@@ -31,17 +34,18 @@ def main():
             .trigger(processingTime="10 seconds")
             .start()
         )
+        logger.info("ETL process is running. Waiting for termination...")
         streaming_query.awaitTermination()
 
     except KeyboardInterrupt:
-        print("Exiting ETL process...")
+        logger.info("Exiting ETL process...")
         for query in spark.streams.active:
             query.stop()
     except Exception as e:
-        print(f"An error occurred: {e}")
+        logger.error(f"An error occurred: {e}")
     finally:
         spark.stop()
-        print("ETL process completed.")
+        logger.info("ETL process completed.")
 
 
 if __name__ == "__main__":

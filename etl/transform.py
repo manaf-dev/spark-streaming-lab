@@ -2,6 +2,8 @@ from pyspark.sql.functions import col, current_timestamp, to_timestamp, trim, up
 
 
 def transform_data(stream_df):
+    """Transform the streaming DataFrame"""
+
     stream_df = stream_df.dropna()
     transformed_df = stream_df.filter((col("product_price") > 0))
     transformed_df = transformed_df.filter(
